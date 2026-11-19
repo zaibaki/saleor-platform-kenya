@@ -40,7 +40,7 @@ services:
       - ./replica_user.sql:/docker-entrypoint-initdb.d/replica_user.sql:ro,z
     environment:
       - POSTGRES_USER=saleor
-      - POSTGRES_PASSWORD=saleor
+      - POSTGRES_PASSWORD=REPLACE_WITH_YOUR_OWN_RANDOM_SECRET
 
   cache:
     image: valkey/valkey:8.1-alpine

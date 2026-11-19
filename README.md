@@ -175,3 +175,49 @@ Some situations do call for extra code; we can cover exotic use cases or build y
 #### Crafted with ❤️ by [Saleor Commerce](https://saleor.io/)
 
 hello@saleor.io
+
+## Kenya (KES) store
+
+This fork adds a Kenyan storefront dataset on top of the upstream demo data:
+
+- Channel `kenya-kes` ("Kenya (KES)", currency KES, default country KE).
+- Category `kenyan-goods` ("Kenyan Goods") with 10 products (SKUs KE-001–KE-010),
+  priced in KES and stocked (50 units each) in the `africa` warehouse.
+- Collections `featured-products` and `summer-picks` are ensured to exist;
+  the Kenyan products are not assigned to any collection.
+
+### How to run
+
+1. Set your own secrets first. `backend.env`, `docker-compose.yml` and
+   `replica_user.sql` ship with `REPLACE_WITH_YOUR_OWN_RANDOM_SECRET`
+   placeholders instead of real credentials. Replace every placeholder with
+   your own random value:
+   - `SECRET_KEY` in `backend.env`
+   - the password inside `DATABASE_URL` in `backend.env` (same value as
+     `POSTGRES_PASSWORD`)
+   - `POSTGRES_PASSWORD` in `docker-compose.yml`
+   - the `saleor_read_only` password in `replica_user.sql`
+2. Start the stack and populate the demo data:
+   ```shell
+   docker compose up -d
+   docker compose exec api python manage.py populatedb
+   ```
+3. Add the Kenyan channel and products:
+   ```shell
+   docker cp scripts/seed-kenya.py saleor-platform-api-1:/tmp/seed-kenya.py
+   docker exec saleor-platform-api-1 python manage.py shell \
+       -c "exec(open('/tmp/seed-kenya.py').read())"
+   ```
+   The script is idempotent and can be re-run safely.
+4. Open the Dashboard at http://localhost:9000 and the API at
+   http://localhost:8000/graphql. Demo login: `admin@example.com` / `admin`.
+
+The companion storefront lives in a separate repository and defaults to the
+`kenya-kes` channel, so prices render in KES.
+
+### Notes
+
+- The Kenyan data lives in the database, not in this repo's files, except for
+  `scripts/seed-kenya.py`, which recreates it from scratch.
+- Shipping zones, taxes and payment settings are the upstream demo ones;
+  no Kenya-specific shipping zone is configured.
